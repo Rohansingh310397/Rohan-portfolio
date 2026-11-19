@@ -103,7 +103,20 @@
     [0,1,2].forEach((i)=>{const torus=new THREE.Mesh(new THREE.TorusGeometry(radius*(.82+i*.1),.008,8,180),new THREE.MeshBasicMaterial({color:i===1?0xb78b5d:0x82936b,transparent:true,opacity:.55}));torus.rotation.set(.7+i*.35,.3+i*.5,.4);group.add(torus);});
   }
 
-  setup("hero3d",(s,g)=>particleOrb(s,g,window.innerWidth<700?500:1250,2.05),{cameraZ:7.5,animate:(g,t)=>{g.rotation.y=t*.08;g.rotation.z=Math.sin(t*.2)*.06;}});
+  setup("hero3d",(s,g)=>{
+    particleOrb(s,g,window.innerWidth<700?850:1900,2.35,0x60794a);
+    // Three intersecting orbital paths create a clearly visible virtual 3D sculpture.
+    const ringSpecs=[[2.55,.018,[.92,.18,.38],0x8c9b70],[2.78,.012,[.25,1.08,.1],0xb78b5d],[2.95,.01,[1.25,.48,.78],0x526a3e]];
+    ringSpecs.forEach(([r,t,rot,c])=>{const ring=new THREE.Mesh(new THREE.TorusGeometry(r,t,10,220),new THREE.MeshPhysicalMaterial({color:c,metalness:.55,roughness:.22,clearcoat:1,transparent:true,opacity:.82}));ring.rotation.set(...rot);g.add(ring);});
+    for(let i=0;i<7;i++){
+      const bead=new THREE.Mesh(new THREE.SphereGeometry(i%2?.075:.11,20,20),new THREE.MeshPhysicalMaterial({color:i%2?0xb78b5d:0xe4ead8,metalness:.35,roughness:.16,clearcoat:1}));
+      bead.userData={orbit:i,base:i/7*Math.PI*2,radius:2.72+(i%3)*.16};g.add(bead);
+    }
+    const halo=new THREE.Mesh(new THREE.SphereGeometry(2.02,48,48),new THREE.MeshBasicMaterial({color:0xaab894,wireframe:true,transparent:true,opacity:.09}));g.add(halo);
+  },{cameraZ:6.6,animate:(g,t)=>{
+    g.rotation.y=t*.105;g.rotation.z=Math.sin(t*.22)*.045;
+    g.children.forEach(o=>{if(o.userData?.orbit!==undefined){const a=o.userData.base+t*(.22+o.userData.orbit*.008);o.position.set(Math.cos(a)*o.userData.radius,Math.sin(a*1.25)*.55,Math.sin(a)*o.userData.radius*.48);}});
+  }});
   setup("ai3d",(s,g)=>{
     particleOrb(s,g,700,1.75,0x647d4c);
     for(let i=0;i<18;i++){
